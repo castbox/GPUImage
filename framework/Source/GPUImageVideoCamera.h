@@ -50,6 +50,8 @@ extern NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString
 /// This enables the capture session preset to be changed on the fly
 @property (readwrite, nonatomic, copy) NSString *captureSessionPreset;
 
+@property(assign, nonatomic) BOOL mirror;
+
 /// This sets the frame rate of the camera (iOS 5 and above only)
 /**
  Setting this to 0 or below will set the frame rate back to the default setting for a particular preset.

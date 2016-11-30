@@ -531,6 +531,18 @@ NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString = SHAD
 	[_captureSession commitConfiguration];
 }
 
+- (void)setMirror:(BOOL)mirror {
+    //set video mirroring
+    AVCaptureConnection* avConnection = [videoOutput connectionWithMediaType:AVMediaTypeVideo];
+    if( [avConnection isVideoMirroringSupported]) {
+        avConnection.videoMirrored = mirror;
+        _mirror = mirror;
+    } else {
+        _mirror = NO;
+        NSLog(@"isVideoMirroringSupported: NO");
+    }
+}
+
 - (void)setFrameRate:(int32_t)frameRate;
 {
 	_frameRate = frameRate;
