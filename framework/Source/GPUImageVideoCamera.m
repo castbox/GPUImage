@@ -97,8 +97,6 @@ NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString = SHAD
 	AVCaptureDeviceInput *audioInput;
 	AVCaptureAudioDataOutput *audioOutput;
     NSDate *startingCaptureTime;
-	
-    dispatch_queue_t cameraProcessingQueue, audioProcessingQueue;
     
     GLProgram *yuvConversionProgram;
     GLint yuvConversionPositionAttribute, yuvConversionTextureCoordinateAttribute;

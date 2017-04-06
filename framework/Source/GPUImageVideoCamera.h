@@ -33,6 +33,8 @@ extern NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString
     AVCaptureDevice *_microphone;
     AVCaptureDeviceInput *videoInput;
 	AVCaptureVideoDataOutput *videoOutput;
+    
+    dispatch_queue_t cameraProcessingQueue, audioProcessingQueue;
 
     BOOL capturePaused;
     GPUImageRotationMode outputRotation, internalRotation;
