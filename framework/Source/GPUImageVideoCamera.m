@@ -192,6 +192,9 @@ NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString = SHAD
 	videoOutput = [[AVCaptureVideoDataOutput alloc] init];
 	[videoOutput setAlwaysDiscardsLateVideoFrames:NO];
     
+    imageOutput = [[AVCaptureStillImageOutput alloc] init];
+//    [imageOutput setAutomaticallyEnablesStillImageStabilizationWhenAvailable:YES];
+    
 //    if (captureAsYUV && [GPUImageContext deviceSupportsRedTextures])
     if (captureAsYUV && [GPUImageContext supportsFastTextureUpload])
     {
@@ -208,17 +211,20 @@ NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString = SHAD
         if (supportsFullYUVRange)
         {
             [videoOutput setVideoSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
+            [imageOutput setOutputSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
             isFullYUVRange = YES;
         }
         else
         {
             [videoOutput setVideoSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
+            [imageOutput setOutputSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
             isFullYUVRange = NO;
         }
     }
     else
     {
         [videoOutput setVideoSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
+        [imageOutput setOutputSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
     }
     
     runSynchronouslyOnVideoProcessingQueue(^{
@@ -284,6 +290,11 @@ NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString = SHAD
 		NSLog(@"Couldn't add video output");
         return nil;
 	}
+    if ([_captureSession canAddOutput:imageOutput]) {
+        [_captureSession addOutput:imageOutput];
+    } else {
+        NSLog(@"Couldn't add image output");
+    }
     
 	_captureSessionPreset = sessionPreset;
     [_captureSession setSessionPreset:_captureSessionPreset];
@@ -322,6 +333,34 @@ NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString = SHAD
     }
 #endif
 }
+
+- (void)enableTorchLight;
+{
+    [_inputCamera lockForConfiguration:nil];
+    if ([_inputCamera hasFlash] && [_inputCamera isFlashModeSupported:AVCaptureFlashModeOn]) {
+        [_inputCamera setFlashMode:AVCaptureFlashModeOn];
+    }
+    [_inputCamera unlockForConfiguration];
+}
+
+- (void)takePhoto:(void (^)(CMSampleBufferRef imageDataSampleBuffer, NSError *error))completion;
+{
+    if (imageOutput) {
+        [imageOutput captureStillImageAsynchronouslyFromConnection:imageOutput.connections.firstObject completionHandler:completion];
+    }
+    
+}
+
+- (void)disableTorchLight;
+{
+    [_inputCamera lockForConfiguration:nil];
+    if ([_inputCamera isFlashModeSupported:AVCaptureFlashModeOff]) {
+        [_inputCamera setFlashMode:AVCaptureFlashModeOff];
+    }
+    [_inputCamera unlockForConfiguration];
+}
+
+
 
 - (BOOL)addAudioInputsAndOutputs
 {

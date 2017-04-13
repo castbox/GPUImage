@@ -33,6 +33,7 @@ extern NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString
     AVCaptureDevice *_microphone;
     AVCaptureDeviceInput *videoInput;
 	AVCaptureVideoDataOutput *videoOutput;
+    AVCaptureStillImageOutput *imageOutput;
     
     dispatch_queue_t cameraProcessingQueue, audioProcessingQueue;
 
@@ -154,5 +155,9 @@ extern NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString
 
 + (BOOL)isBackFacingCameraPresent;
 + (BOOL)isFrontFacingCameraPresent;
+
+- (void)enableTorchLight;
+- (void)disableTorchLight;
+- (void)takePhoto:(void (^)(CMSampleBufferRef imageDataSampleBuffer, NSError *error))completion;
 
 @end
