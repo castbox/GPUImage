@@ -211,21 +211,23 @@ NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString = SHAD
         if (supportsFullYUVRange)
         {
             [videoOutput setVideoSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
-            [imageOutput setOutputSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
+//            [imageOutput setOutputSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarFullRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
             isFullYUVRange = YES;
         }
         else
         {
             [videoOutput setVideoSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
-            [imageOutput setOutputSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
+//            [imageOutput setOutputSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
             isFullYUVRange = NO;
         }
     }
     else
     {
         [videoOutput setVideoSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
-        [imageOutput setOutputSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
+//        [imageOutput setOutputSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
     }
+    
+    [imageOutput setOutputSettings:[NSDictionary dictionaryWithObject:AVVideoCodecJPEG forKey:AVVideoCodecKey]];
     
     runSynchronouslyOnVideoProcessingQueue(^{
         
@@ -578,6 +580,11 @@ NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString = SHAD
         _mirror = NO;
         NSLog(@"isVideoMirroringSupported: NO");
     }
+    
+    AVCaptureConnection* imageConnection = [imageOutput connectionWithMediaType:AVMediaTypeVideo];
+    if ([imageConnection isVideoMirroringSupported]) {
+        imageConnection.videoMirrored = mirror;
+    }
 }
 
 - (void)setFrameRate:(int32_t)frameRate;
@@ -662,6 +669,17 @@ NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString = SHAD
 		}
 	}
     
+    return nil;
+}
+
+- (AVCaptureConnection *)imageCaptureConnection {
+    for (AVCaptureConnection *connection in [imageOutput connections]) {
+        for (AVCaptureInputPort *port in [connection inputPorts]) {
+            if ([[port mediaType] isEqualToString:AVMediaTypeVideo]) {
+                return connection;
+            }
+        }
+    }
     return nil;
 }
 

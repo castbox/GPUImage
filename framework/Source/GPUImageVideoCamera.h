@@ -141,6 +141,10 @@ extern NSString *const kGPUImageYUVVideoRangeConversionForLAFragmentShaderString
  */
 - (AVCaptureConnection *)videoCaptureConnection;
 
+/** Get the AVCaptureConnection of the static image
+ */
+- (AVCaptureConnection *)imageCaptureConnection;
+
 /** This flips between the front and rear cameras
  */
 - (void)rotateCamera;
